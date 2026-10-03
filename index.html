@@ -168,6 +168,7 @@ h2 {
       display:block;
       background:#111;
       box-shadow:0 10px 28px rgba(86,69,91,.12);
+      object-fit:contain;
     }
     .video-link{
       display:inline-block;
@@ -179,43 +180,6 @@ h2 {
       overflow-wrap:anywhere;
     }
     .video-link:hover{text-decoration:underline;}
-.tweet-wrap {
-  display:flex;
-  justify-content:center;
-  width:100%;
-  max-width:100%;
-  overflow:hidden;
-  border-radius:14px;
-}
-.twitter-tweet {
-  margin:0 !important;
-  width:100% !important;
-  max-width:100% !important;
-  min-width:0 !important;
-}
-.twitter-tweet a,
-.fallback-link {
-  display:block;
-  max-width:100%;
-  overflow-wrap:anywhere;
-  word-break:break-word;
-  white-space:normal;
-}
-.fallback-link {
-  padding:14px 16px;
-  border:1px solid var(--line);
-  border-radius:12px;
-  background:#f7fbff;
-  color:#1769aa;
-  text-decoration:none;
-  font-weight:700;
-  text-align:center;
-}
-.fallback-link:hover {
-  text-decoration:underline;
-  background:#eef8ff;
-}
-
 .empty {
   padding:40px 20px; text-align:center; color:var(--muted);
   border:2px dashed var(--line); border-radius:16px; background:#fff;
@@ -311,16 +275,15 @@ function render(items) {
         <h2>${escapeHtml(v.title)}</h2>
       </div>
       <div class="embed">
-        <div class="tweet-wrap">
-          <iframe class="x-video-player"
-                  src="https://twitter.com/i/videos/tweet/${v.id}"
-                  title="${escapeHtml(v.title)}"
-                  loading="lazy"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowfullscreen
-                  referrerpolicy="strict-origin-when-cross-origin"></iframe>
-            <a class="video-link" href="${v.url}" target="_blank" rel="noopener noreferrer">Xで投稿を開く</a>
-        </div>
+        <video class="x-video-player"
+               controls
+               playsinline
+               preload="metadata"
+               title="${escapeHtml(v.title)}"
+               src="https://d.fxtwitter.com/banana_3150vv/status/${v.id}.mp4">
+          お使いのブラウザでは動画を再生できません。
+        </video>
+        <a class="video-link" href="${v.url}" target="_blank" rel="noopener noreferrer">Xで投稿を開く</a>
       </div>
     </article>
   `).join("");
