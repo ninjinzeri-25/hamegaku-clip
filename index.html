@@ -148,38 +148,51 @@ main { max-width:1160px; margin:0 auto; padding:34px 20px 80px; }
   font-size:.76rem; font-weight:950; transform:rotate(-1deg);
 }
 h2 {
-  margin:8px 0 0; line-height:1.45; font-weight:850;
-  font-size:clamp(.98rem,1.25vw,1.13rem);
+  position:relative;
+  margin:10px 0 0;
+  padding:11px 14px 11px 17px;
+  line-height:1.5;
+  font-weight:900;
+  font-size:clamp(1.12rem,1.55vw,1.32rem);
+  letter-spacing:.015em;
   overflow-wrap:anywhere;
+  background:linear-gradient(90deg, var(--pink2), rgba(255,214,225,.28) 72%, transparent);
+  border-radius:8px;
 }
- .embed{
-      width:100%;
-      max-width:650px;
-      margin:0 auto;
-      padding:0 0 12px;
-    }
-    .x-video-player{
-      width:100%;
-      aspect-ratio:16 / 9;
-      min-height:320px;
-      border:0;
-      border-radius:14px;
-      overflow:hidden;
-      display:block;
-      background:#111;
-      box-shadow:0 10px 28px rgba(86,69,91,.12);
-      object-fit:contain;
-    }
-    .video-link{
-      display:inline-block;
-      margin-top:10px;
-      color:var(--ink);
-      font-size:.82rem;
-      text-decoration:none;
-      word-break:break-all;
-      overflow-wrap:anywhere;
-    }
-    .video-link:hover{text-decoration:underline;}
+h2::before {
+  content:"";
+  position:absolute;
+  left:0; top:8px; bottom:8px;
+  width:5px;
+  border-radius:999px;
+  background:var(--pink);
+}
+.card:nth-child(3n) h2 {
+  background:linear-gradient(90deg, var(--blue2), rgba(217,242,255,.25) 72%, transparent);
+}
+.card:nth-child(3n) h2::before { background:var(--blue); }
+.card:nth-child(3n+2) h2 {
+  background:linear-gradient(90deg, rgba(155,134,232,.18), rgba(155,134,232,.05) 72%, transparent);
+}
+.card:nth-child(3n+2) h2::before { background:var(--purple); }
+.embed {
+  width:100%; max-width:650px; margin:0 auto;
+  padding:0 14px 17px; min-height:130px;
+}
+.tweet-wrap { display:flex; justify-content:center; width:100%; overflow:hidden; }
+.twitter-tweet {
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+  max-width:100% !important;
+  width:100% !important;
+  min-width:0 !important;
+}
+.twitter-tweet a {
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.twitter-tweet { margin-top:0 !important; margin-bottom:0 !important; max-width:100% !important; }
+
 .empty {
   padding:40px 20px; text-align:center; color:var(--muted);
   border:2px dashed var(--line); border-radius:16px; background:#fff;
@@ -222,9 +235,10 @@ footer { text-align:center; color:var(--muted); padding:0 20px 40px; font-size:.
     padding:0 0 9px;
   }
   h2 {
-    /* タイトルは内容量に応じてclampで自動調整 */
-    font-size:clamp(.88rem,3.9vw,1.05rem);
-    line-height:1.42;
+    /* スマホでもタイトルをしっかり目立たせる */
+    font-size:clamp(1.02rem,4.4vw,1.18rem);
+    line-height:1.48;
+    padding:10px 12px 10px 15px;
   }
   .twitter-tweet {
     width:100% !important;
@@ -233,7 +247,52 @@ footer { text-align:center; color:var(--muted); padding:0 20px 40px; font-size:.
   }
 }
 
-    .x-video-player{min-height:220px;}
+
+
+/* TITLE EMPHASIS START */
+.card-header h2 {
+  margin:11px 0 0;
+  padding:0 0 11px;
+  background:transparent !important;
+  background-image:none !important;
+  border:none !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  font-size:clamp(1.08rem,1.45vw,1.28rem);
+  font-weight:850;
+  line-height:1.48;
+  letter-spacing:.01em;
+}
+
+.card-header h2::before {
+  content:none !important;
+  display:none !important;
+}
+
+.card-header h2::after {
+  content:"";
+  display:block;
+  width:100%;
+  height:1px;
+  margin-top:10px;
+  background:rgba(59,53,69,.20) !important;
+  background-image:none !important;
+}
+
+@media (max-width:560px) {
+  .card-header h2 {
+    margin-top:9px;
+    padding-bottom:8px;
+    font-size:clamp(1rem,4.25vw,1.14rem);
+    line-height:1.46;
+  }
+
+  .card-header h2::after {
+    margin-top:8px;
+  }
+}
+/* TITLE EMPHASIS END */
+
 </style>
 </head>
 <body>
@@ -275,15 +334,11 @@ function render(items) {
         <h2>${escapeHtml(v.title)}</h2>
       </div>
       <div class="embed">
-        <video class="x-video-player"
-               controls
-               playsinline
-               preload="metadata"
-               title="${escapeHtml(v.title)}"
-               src="https://d.fxtwitter.com/banana_3150vv/status/${v.id}.mp4">
-          お使いのブラウザでは動画を再生できません。
-        </video>
-        <a class="video-link" href="${v.url}" target="_blank" rel="noopener noreferrer">Xで投稿を開く</a>
+        <div class="tweet-wrap">
+          <blockquote class="twitter-tweet" data-dnt="true">
+            <a href="${v.url}" target="_blank" rel="noopener noreferrer">Xで投稿を見る</a>
+          </blockquote>
+        </div>
       </div>
     </article>
   `).join("");
@@ -292,7 +347,7 @@ function render(items) {
   count.textContent = `${items.length} / ${videos.length} 本`;
 
   if (window.twttr && window.twttr.widgets) {
-    
+    window.twttr.widgets.load(list);
   }
 }
 
@@ -308,9 +363,25 @@ search.addEventListener("input", () => {
   render(filtered);
 });
 
-// 動画プレイヤーだけを使うページなので、Xウィジェットの読み込みを待たずに表示。
-render(videos);
-</script>
+// X公式ウィジェットの読み込み完了を待ってから初回表示。
+// これにより、長いX URLがそのまま表示され続ける問題を防ぎ、
+// 動画付き投稿はページ内のXプレイヤーで再生できるようにする。
+function startPage() {
+  render(videos);
+}
 
+if (window.twttr && window.twttr.ready) {
+  window.twttr.ready(startPage);
+} else {
+  window.addEventListener("load", () => {
+    if (window.twttr && window.twttr.ready) {
+      window.twttr.ready(startPage);
+    } else {
+      startPage();
+    }
+  });
+}
+</script>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
 </html>
