@@ -156,8 +156,42 @@ h2 {
   width:100%; max-width:650px; margin:0 auto;
   padding:0 14px 17px; min-height:130px;
 }
-.tweet-wrap { display:flex; justify-content:center; width:100%; }
-.twitter-tweet { margin-top:0 !important; margin-bottom:0 !important; max-width:100% !important; }
+.tweet-wrap {
+  display:flex;
+  justify-content:center;
+  width:100%;
+  max-width:100%;
+  overflow:hidden;
+  border-radius:14px;
+}
+.twitter-tweet {
+  margin:0 !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+}
+.twitter-tweet a,
+.fallback-link {
+  display:block;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  white-space:normal;
+}
+.fallback-link {
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#f7fbff;
+  color:#1769aa;
+  text-decoration:none;
+  font-weight:700;
+  text-align:center;
+}
+.fallback-link:hover {
+  text-decoration:underline;
+  background:#eef8ff;
+}
 
 .empty {
   padding:40px 20px; text-align:center; color:var(--muted);
@@ -207,6 +241,7 @@ footer { text-align:center; color:var(--muted); padding:0 20px 40px; font-size:.
   }
   .twitter-tweet {
     width:100% !important;
+    max-width:100% !important;
     min-width:0 !important;
   }
 }
@@ -252,8 +287,10 @@ function render(items) {
       </div>
       <div class="embed">
         <div class="tweet-wrap">
-          <blockquote class="twitter-tweet" data-dnt="true">
-            <a href="${v.url}">${escapeHtml(v.url)}</a>
+          <blockquote class="twitter-tweet" data-dnt="true" data-theme="light">
+            <a class="fallback-link" href="${v.url}" target="_blank" rel="noopener noreferrer">
+              ▶ このページで動画を再生する（Xの投稿）
+            </a>
           </blockquote>
         </div>
       </div>
@@ -280,7 +317,25 @@ search.addEventListener("input", () => {
   render(filtered);
 });
 
-render(videos);
+// X公式ウィジェットの読み込み完了を待ってから初回表示。
+// X側の動画プレイヤーをページ内に生成するため、動画付き投稿は
+// 外部ページへ移動せず、このホームページ上のXプレイヤーで再生できます。
+// ウィジェットが読み込めない場合も、長いURLではなく短い案内リンクを表示します。
+function startPage() {
+  render(videos);
+}
+
+if (window.twttr && window.twttr.ready) {
+  window.twttr.ready(startPage);
+} else {
+  window.addEventListener("load", () => {
+    if (window.twttr && window.twttr.ready) {
+      window.twttr.ready(startPage);
+    } else {
+      startPage();
+    }
+  });
+}
 </script>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </body>
