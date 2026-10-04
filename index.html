@@ -646,7 +646,12 @@ render(videos);
   for (let i = 0; i < count; i++) {
     const el = document.createElement("span");
     el.className = "bg-emoji";
-    el.textContent = icons[Math.floor(rand() * icons.length)];
+    /* Balanced distribution: cycle through all seven icons so the
+       same emoji does not bunch up or appear next to itself repeatedly. */
+    const rowIndex = Math.floor(i / cols);
+    const colIndex = i % cols;
+    const iconIndex = (colIndex + rowIndex * 3) % icons.length;
+    el.textContent = icons[iconIndex];
 
     const col = i % cols;
     const row = Math.floor(i / cols);
@@ -659,7 +664,7 @@ render(videos);
     const y = row * cellH + cellH * (0.22 + rand() * 0.56);
     el.style.left = x + "%";
     el.style.top = y + "%";
-    el.style.fontSize = (34 + rand() * 34) + "px";
+    el.style.fontSize = "68px";
     el.style.setProperty("--rot", ((rand() * 50) - 25) + "deg");
     el.style.setProperty("--dx", ((rand() * 16) - 8) + "px");
     el.style.setProperty("--dy", ((rand() * 18) - 9) + "px");
