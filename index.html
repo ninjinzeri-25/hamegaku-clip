@@ -293,6 +293,160 @@ footer { text-align:center; color:var(--muted); padding:0 20px 40px; font-size:.
 }
 /* TITLE EMPHASIS END */
 
+
+/* X EMBED FIX START */
+/* X公式投稿（本文＋動画）をカード内に余白を持たせて表示 */
+.embed {
+  width:100%;
+  max-width:none;
+  margin:0 auto;
+  padding:0 18px 18px;
+}
+
+.tweet-wrap {
+  width:100%;
+  max-width:650px;
+  margin:0 auto;
+  overflow:visible;
+  display:block;
+}
+
+.tweet-wrap .twitter-tweet,
+.tweet-wrap iframe {
+  width:100% !important;
+  max-width:650px !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+
+.x-post-link {
+  display:block;
+  width:100%;
+  max-width:650px;
+  margin:8px auto 0;
+  color:var(--muted);
+  font-size:.82rem;
+  text-decoration:none;
+  text-align:left;
+}
+
+.x-post-link:hover {
+  text-decoration:underline;
+}
+
+@media (max-width:560px) {
+  .embed {
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .tweet-wrap,
+  .x-post-link {
+    max-width:none;
+  }
+}
+/* X EMBED FIX END */
+
+
+/* CARD HOVER ACCENT ONLY */
+@media (hover:hover) and (pointer:fine) {
+  .card:hover {
+    transform:translateY(-3px);
+    box-shadow:var(--shadow);
+  }
+
+  .card:hover::before {
+    content:"";
+    position:absolute;
+    inset:5px;
+    border:1.5px solid rgba(59,53,69,.18);
+    border-radius:15px;
+    pointer-events:none;
+    z-index:2;
+  }
+
+  .card:nth-child(3n):hover::before {
+    border-color:rgba(103,183,232,.55);
+  }
+
+  .card:nth-child(3n+1):hover::before {
+    border-color:rgba(255,126,159,.55);
+  }
+
+  .card:nth-child(3n+2):hover::before {
+    border-color:rgba(155,134,232,.55);
+  }
+}
+
+
+/* EQUAL CARD HEIGHTS START */
+/* 2列の全カードを完全に同じ高さへ */
+.grid {
+  align-items:stretch;
+}
+
+.card {
+  height:820px;
+  display:flex;
+  flex-direction:column;
+}
+
+/* CLIP番号＋タイトル欄も全カード同じ高さ */
+.card-header {
+  height:150px;
+  min-height:150px;
+  max-height:150px;
+  display:flex;
+  flex-direction:column;
+  flex:0 0 150px;
+  overflow:hidden;
+}
+
+.card-header .no {
+  align-self:flex-start;
+  flex:0 0 auto;
+}
+
+.card-header h2 {
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+}
+
+/* 投稿表示部分も残り高さを統一 */
+.embed {
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.tweet-wrap {
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+}
+
+/* Xリンクはカード下部で位置を統一 */
+.x-post-link {
+  flex:0 0 auto;
+}
+
+/* スマホでも全カード同一高さ */
+@media (max-width:560px) {
+  .card {
+    height:760px;
+  }
+
+  .card-header {
+    height:140px;
+    min-height:140px;
+    max-height:140px;
+    flex-basis:140px;
+  }
+}
+/* EQUAL CARD HEIGHTS END */
+
 </style>
 </head>
 <body>
@@ -326,6 +480,12 @@ const empty = document.getElementById("empty");
 const count = document.getElementById("count");
 const search = document.getElementById("search");
 
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+  })[c]);
+}
+
 function render(items) {
   list.innerHTML = items.map((v, index) => `
     <article class="card" style="animation-delay:${Math.min(index * 45, 900)}ms">
@@ -335,10 +495,18 @@ function render(items) {
       </div>
       <div class="embed">
         <div class="tweet-wrap">
-          <blockquote class="twitter-tweet" data-dnt="true">
-            <a href="${v.url}" target="_blank" rel="noopener noreferrer">Xで投稿を見る</a>
+          <blockquote class="twitter-tweet"
+                      data-dnt="true"
+                      data-theme="light"
+                      data-align="center"
+                      data-conversation="none">
+            <a href="${v.url}">Xで投稿を見る</a>
           </blockquote>
         </div>
+        <a class="x-post-link"
+           href="${v.url}"
+           target="_blank"
+           rel="noopener noreferrer">Xで投稿を見る</a>
       </div>
     </article>
   `).join("");
@@ -346,15 +514,26 @@ function render(items) {
   empty.hidden = items.length !== 0;
   count.textContent = `${items.length} / ${videos.length} 本`;
 
-  if (window.twttr && window.twttr.widgets) {
-    window.twttr.widgets.load(list);
-  }
+  loadXEmbeds();
 }
 
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
-  })[c]);
+function loadXEmbeds() {
+  if (window.twttr && window.twttr.widgets) {
+    window.twttr.widgets.load(list);
+    return;
+  }
+
+  // widgets.js がまだ読み込み中なら少し待って再試行
+  let tries = 0;
+  const timer = setInterval(() => {
+    tries++;
+    if (window.twttr && window.twttr.widgets) {
+      clearInterval(timer);
+      window.twttr.widgets.load(list);
+    } else if (tries >= 40) {
+      clearInterval(timer);
+    }
+  }, 250);
 }
 
 search.addEventListener("input", () => {
@@ -363,25 +542,37 @@ search.addEventListener("input", () => {
   render(filtered);
 });
 
-// X公式ウィジェットの読み込み完了を待ってから初回表示。
-// これにより、長いX URLがそのまま表示され続ける問題を防ぎ、
-// 動画付き投稿はページ内のXプレイヤーで再生できるようにする。
-function startPage() {
-  render(videos);
-}
-
-if (window.twttr && window.twttr.ready) {
-  window.twttr.ready(startPage);
-} else {
-  window.addEventListener("load", () => {
-    if (window.twttr && window.twttr.ready) {
-      window.twttr.ready(startPage);
-    } else {
-      startPage();
-    }
-  });
-}
+// HTML自体は待たずに描画し、X公式widgets.jsが利用可能になり次第投稿へ変換する
+render(videos);
 </script>
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<script defer src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<script>
+(function () {
+  function fitClipTitles() {
+    document.querySelectorAll(".card-header h2").forEach(function (title) {
+      title.style.fontSize = "";
+      var size = parseFloat(getComputedStyle(title).fontSize);
+      var minSize = window.innerWidth <= 560 ? 13 : 14;
+
+      while (title.scrollHeight > title.clientHeight && size > minSize) {
+        size -= 0.5;
+        title.style.fontSize = size + "px";
+      }
+    });
+  }
+
+  window.addEventListener("load", fitClipTitles);
+  window.addEventListener("resize", fitClipTitles);
+
+  var list = document.getElementById("video-list");
+  if (list) {
+    new MutationObserver(function () {
+      requestAnimationFrame(fitClipTitles);
+    }).observe(list, { childList:true, subtree:false });
+  }
+})();
+</script>
+
 </body>
 </html>
