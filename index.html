@@ -483,6 +483,48 @@ footer { text-align:center; color:var(--muted); padding:0 20px 40px; font-size:.
   }
 }
 
+
+/* BACKGROUND EMOJI DECORATION ONLY */
+body {
+  position:relative;
+}
+
+.bg-emoji-layer {
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.bg-emoji {
+  position:absolute;
+  opacity:.16;
+  user-select:none;
+  filter:saturate(.85);
+  animation:bgEmojiFloat var(--float-time) ease-in-out infinite alternate;
+}
+
+@keyframes bgEmojiFloat {
+  from { transform:translate3d(0,0,0) rotate(var(--rot)); }
+  to   { transform:translate3d(var(--dx),var(--dy),0) rotate(calc(var(--rot) + 8deg)); }
+}
+
+/* Ensure all actual page content/cards stay above the emoji background */
+header,
+main,
+footer,
+.search-wrap,
+.grid,
+.card {
+  position:relative;
+  z-index:1;
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .bg-emoji { animation:none !important; }
+}
+
 </style>
 </head>
 <body>
@@ -582,6 +624,53 @@ search.addEventListener("input", () => {
 render(videos);
 </script>
 <script defer src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<script>
+(function () {
+  const icons = ["🦋","🛸","🎰","🏹","🌌","🌺","🌹"];
+  const layer = document.createElement("div");
+  layer.className = "bg-emoji-layer";
+  layer.setAttribute("aria-hidden", "true");
+
+  /* Deterministic pseudo-random placement so layout is stable on reload. */
+  let seed = 3150;
+  function rand() {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  }
+
+  const cols = 6;
+  const rows = 6;
+  const count = cols * rows;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement("span");
+    el.className = "bg-emoji";
+    el.textContent = icons[Math.floor(rand() * icons.length)];
+
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const cellW = 100 / cols;
+    const cellH = 100 / rows;
+
+    /* One emoji per grid cell + small random offset:
+       keeps the scattered feeling without clumping together. */
+    const x = col * cellW + cellW * (0.22 + rand() * 0.56);
+    const y = row * cellH + cellH * (0.22 + rand() * 0.56);
+    el.style.left = x + "%";
+    el.style.top = y + "%";
+    el.style.fontSize = (34 + rand() * 34) + "px";
+    el.style.setProperty("--rot", ((rand() * 50) - 25) + "deg");
+    el.style.setProperty("--dx", ((rand() * 16) - 8) + "px");
+    el.style.setProperty("--dy", ((rand() * 18) - 9) + "px");
+    el.style.setProperty("--float-time", (5 + rand() * 5) + "s");
+    el.style.animationDelay = (-rand() * 6) + "s";
+    layer.appendChild(el);
+  }
+
+  document.body.prepend(layer);
+})();
+</script>
 
 </body>
 </html>
