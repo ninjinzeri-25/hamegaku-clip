@@ -469,6 +469,20 @@ footer { text-align:center; color:var(--muted); padding:0 20px 40px; font-size:.
   }
 }
 
+
+/* UNIFORM TITLE SIZE ONLY */
+.card-header h2 {
+  font-size:1.13rem !important;
+  font-weight:900 !important;
+}
+
+@media (max-width:560px) {
+  .card-header h2 {
+    font-size:1.05rem !important;
+    font-weight:900 !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -568,33 +582,6 @@ search.addEventListener("input", () => {
 render(videos);
 </script>
 <script defer src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-<script>
-(function () {
-  function fitClipTitles() {
-    document.querySelectorAll(".card-header h2").forEach(function (title) {
-      title.style.fontSize = "";
-      var size = parseFloat(getComputedStyle(title).fontSize);
-      var minSize = window.innerWidth <= 560 ? 13 : 14;
-
-      while (title.scrollHeight > title.clientHeight && size > minSize) {
-        size -= 0.5;
-        title.style.fontSize = size + "px";
-      }
-    });
-  }
-
-  window.addEventListener("load", fitClipTitles);
-  window.addEventListener("resize", fitClipTitles);
-
-  var list = document.getElementById("video-list");
-  if (list) {
-    new MutationObserver(function () {
-      requestAnimationFrame(fitClipTitles);
-    }).observe(list, { childList:true, subtree:false });
-  }
-})();
-</script>
 
 </body>
 </html>
